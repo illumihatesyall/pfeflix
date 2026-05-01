@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="form-page">
+  <div class="form-card fade-in">
+    <h1>Welcome Back</h1>
+    <p class="subtitle">Sign in to your PFEFLIX account</p>
+
+    <form method="POST">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-group">
+        <label>{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      {% endfor %}
+      {% if form.non_field_errors %}
+      <div style="color:#ff6b6b;font-size:13px;margin-bottom:12px;">{{ form.non_field_errors }}</div>
+      {% endif %}
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;">Sign In</button>
+    </form>
+
+    <div class="form-footer">
+      Don't have an account? <a href="/register/">Get started</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

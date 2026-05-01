@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="form-page">
+  <div class="q-card fade-in">
+    <h1>Your Taste Profile</h1>
+    <p class="subtitle">Help us find exactly what you'll love. You can change these anytime.</p>
+
+    <form method="POST" id="prefForm">
+      {% csrf_token %}
+
+      <!-- GENRES -->
+      <div class="q-section">
+        <div class="q-section-title">Favorite Genres <span style="color:#555;font-size:10px;">(pick as many as you like)</span></div>
+        <div class="genre-grid">
+          {% for value, label in form.genres.field.choices %}
+          <div class="genre-pill">
+            <input type="checkbox" name="genres" value="{{ value }}"
+              id="genre_{{ forloop.counter }}"
+              {% if value in form.genres.value %}checked{% endif %}>
+            <label for="genre_{{ forloop.counter }}">{{ label }}</label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- CONTENT TYPE -->
+      <div class="q-section">
+        <div class="q-section-title">Content Type</div>
+        <select name="content_type" class="q-select">
+          {% for value, label in form.content_type.field.choices %}
+          <option value="{{ value }}" {% if form.content_type.value == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- PLATFORM -->
+      <div class="q-section">
+        <div class="q-section-title">Preferred Platform</div>
+        <select name="platform" class="q-select">
+          {% for value, label in form.platform.field.choices %}
+          <option value="{{ value }}" {% if form.platform.value == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- RATING -->
+      <div class="q-section">
+        <div class="q-section-title">Maximum Rating</div>
+        <select name="max_rating" class="q-select">
+          {% for value, label in form.max_rating.field.choices %}
+          <option value="{{ value }}" {% if form.max_rating.value == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;font-size:16px;padding:15px;">
+        Save & Get Recommendations →
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
