@@ -100,3 +100,5 @@ LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/login/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CSRF_TRUSTED_ORIGINS = ['https://' + host.strip() for host in os.environ.get('ALLOWED_HOSTS', '').split(',') if host.strip()]
