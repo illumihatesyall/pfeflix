@@ -156,3 +156,134 @@ def rate_movie(request, title):
 def logout_user(request):
     logout(request)
     return redirect('home')
+
+
+@login_required
+def chatbot(request):
+    """AJAX endpoint — takes a user message, returns a bot reply + optional recommendations."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST only'}, status=405)
+
+    import json
+    from .models import Content, UserPreference
+
+    data = json.loads(request.body)
+    message = data.get('message', '').lower().strip()
+    step = data.get('step', 0)
+
+    # ── Step-based conversation flow ─────────────────────
+    # Step 0 → ask mood
+    # Step 1 → ask time available
+    # Step 2 → ask who watching with
+    # Step 3 → generate recommendations
+
+    if step == 0:
+        return JsonResponse({
+            'reply': "Hey! 👋 What's your mood right now?",
+            'options': ['😂 Something funny', '😱 Thrill me', '😢 Emotional / Drama', '🤩 Action-packed', '🧠 Make me think', '💕 Romantic'],
+            'next_step': 1
+        })
+
+    elif step == 1:
+        # Map mood to genres
+        mood_map = {
+            'funny': ['Comedies', 'Comedy'],
+            'thrill': ['Thriller', 'Horror'],
+            'emotional': ['Drama', 'Dramas'],
+            'action': ['Action', 'Action-Adventure'],
+            'think': ['Documentaries', 'Documentary', 'Biographical'],
+            'romantic': ['Romance', 'Drama'],
+        }
+        genres = []
+        for key, vals in mood_map.items():
+            if key in message:
+                genres = vals
+                break
+        if not genres:
+            genres = ['Drama', 'Comedy']
+
+        request.session['chatbot_genres'] = genres
+
+        return JsonResponse({
+            'reply': f"Great choice! How much time do you have?",
+            'options': ['⚡ Under 30 min', '🕐 About an hour', '🎬 Full movie (2h+)', '📺 I want a series'],
+            'next_step': 2
+        })
+
+    elif step == 2:
+        # Map time to content type / duration
+        if 'series' in message or 'série' in message:
+            content_type = 'TV Show'
+            max_duration = None
+        elif 'under 30' in message or '30 min' in message:
+            content_type = 'Movie'
+            max_duration = 30
+        elif 'hour' in message or '1h' in message:
+            content_type = 'Movie'
+            max_duration = 80
+        else:
+            content_type = 'Movie'
+            max_duration = None
+
+        request.session['chatbot_type'] = content_type
+        request.session['chatbot_duration'] = max_duration
+
+        return JsonResponse({
+            'reply': "Last one — who are you watching with?",
+            'options': ['🙋 Just me', '👫 With my partner', '👨‍👩‍👧 Family / kids', '👯 With friends'],
+            'next_step': 3
+        })
+
+    elif step == 3:
+        # Map audience to rating filter
+        rating_map = {
+            'kids': ['Kids', 'General', 'PG'],
+            'family': ['Kids', 'General', 'PG', 'Teen'],
+            'partner': ['Teen', 'Adult'],
+            'friends': ['Teen', 'Adult'],
+            'just me': ['Teen', 'Adult', 'Unrated'],
+        }
+        allowed_ratings = ['Teen', 'Adult']
+        for key, vals in rating_map.items():
+            if key in message:
+                allowed_ratings = vals
+                break
+
+        # Pull session data
+        genres = request.session.get('chatbot_genres', ['Drama'])
+        content_type = request.session.get('chatbot_type', '')
+        max_duration = request.session.get('chatbot_duration', None)
+
+        # Query DB
+        qs = Content.objects.all()
+        if content_type:
+            qs = qs.filter(type=content_type)
+        if allowed_ratings:
+            qs = qs.filter(rating__in=allowed_ratings)
+        if max_duration:
+            qs = qs.filter(duration_minutes__lte=max_duration, duration_minutes__isnull=False)
+
+        # Score by genre
+        candidates = list(qs[:400])
+        def score(item):
+            ig = item.genres.lower()
+            return sum(1 for g in genres if g.lower() in ig)
+        candidates.sort(key=score, reverse=True)
+        results = candidates[:6]
+
+        movies = [{
+            'title': m.title,
+            'platform': m.platform,
+            'type': m.type,
+            'year': m.release_year,
+            'genres': m.genres[:60],
+            'rating': m.rating,
+        } for m in results]
+
+        return JsonResponse({
+            'reply': f"Here are {len(movies)} picks just for you 🎬",
+            'movies': movies,
+            'next_step': 'done'
+        })
+
+    return JsonResponse({'reply': "I didn't catch that, try again!", 'next_step': step})

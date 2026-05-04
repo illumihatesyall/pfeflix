@@ -10,4 +10,5 @@ urlpatterns = [
     path('questionnaire/', views.questionnaire, name='questionnaire'),
     path('recommendations/', views.recommendations, name='recommendations'),
     path('rate/<str:title>/', views.rate_movie, name='rate_movie'),
+    path('chatbot/', views.chatbot, name='chatbot'),
 ]
