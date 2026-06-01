@@ -63,8 +63,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'PFE.wsgi.application'
 
 # ── Database ────────────────────────────────────────────────
-# Uses DATABASE_URL env var (Neon connection string)
-# Falls back to local PostgreSQL for development
+# Uses DATABASE_URL env var (Railway provides this automatically)
+# Falls back to SQLite for development
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
@@ -74,12 +74,8 @@ if DATABASE_URL:
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'pfe_db',
-            'USER': 'postgres',
-            'PASSWORD': '1234',
-            'HOST': '127.0.0.1',
-            'PORT': '5432',
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
