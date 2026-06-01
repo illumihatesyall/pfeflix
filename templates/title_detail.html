@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-wrap">
+
+  <!-- Back button -->
+  <div style="margin-bottom:24px;">
+    <a href="javascript:history.back()"
+       style="color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;
+              display:inline-flex;align-items:center;gap:6px;transition:color .2s;"
+       onmouseover="this.style.color='var(--text)'"
+       onmouseout="this.style.color='var(--muted)'">
+      ← Back
+    </a>
+  </div>
+
+  <!-- Hero section -->
+  <div style="display:flex;gap:32px;align-items:flex-start;margin-bottom:48px;flex-wrap:wrap;">
+
+    <!-- Poster -->
+    <div style="flex-shrink:0;width:200px;">
+      <div class="card-poster-placeholder"
+           style="width:200px;height:300px;border-radius:12px;font-size:48px;
+                  background:linear-gradient(135deg,#1a1a2e,#16213e);">
+        <div class="icon" style="font-size:48px;">
+          {% if content.type == 'TV Show' %}📺{% else %}🎬{% endif %}
+        </div>
+        <div style="font-size:11px;color:#555;text-align:center;padding:0 12px;line-height:1.4;">
+          {{ content.title|truncatechars:40 }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div style="flex:1;min-width:260px;">
+
+      <!-- Title + type badge -->
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+        <h1 style="font-family:'Bebas Neue',sans-serif;font-size:42px;
+                   letter-spacing:1px;line-height:1.1;margin:0;">
+          {{ content.title }}
+        </h1>
+        <span class="badge" style="font-size:13px;padding:5px 14px;">
+          {% if content.type == 'TV Show' %}📺 TV Show{% else %}🎬 Movie{% endif %}
+        </span>
+      </div>
+
+      <!-- Meta row -->
+      <div class="card-meta" style="margin-bottom:20px;flex-wrap:wrap;gap:8px;">
+        <span class="badge badge-platform-{{ content.platform|truncatewords:1|cut:' ' }}"
+              style="font-size:13px;padding:5px 12px;">
+          {{ content.platform }}
+        </span>
+        {% if content.release_year %}
+        <span class="badge" style="font-size:13px;">{{ content.release_year }}</span>
+        {% endif %}
+        {% if content.rating %}
+        <span class="badge" style="font-size:13px;">{{ content.rating }}</span>
+        {% endif %}
+        {% if content.type == 'Movie' and content.duration_minutes %}
+        <span class="badge" style="font-size:13px;">⏱ {{ content.duration_minutes }} min</span>
+        {% endif %}
+        {% if content.type == 'TV Show' and content.num_seasons %}
+        <span class="badge" style="font-size:13px;">{{ content.num_seasons }} season{{ content.num_seasons|pluralize }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Genres -->
+      {% if content.genres %}
+      <div style="margin-bottom:20px;display:flex;flex-wrap:wrap;gap:8px;">
+        {% for genre in content.genres.split %}
+        <span style="padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;
+                     background:var(--surface2);color:var(--muted);border:1px solid var(--border);">
+          {{ genre|cut:"," }}
+        </span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Description / Synopsis -->
+      {% if content.description %}
+      <div style="margin-bottom:24px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;
+                    text-transform:uppercase;color:var(--muted);margin-bottom:8px;">
+          Synopsis
+        </div>
+        <p style="font-size:14px;line-height:1.7;color:var(--text);margin:0;max-width:600px;">
+          {{ content.description }}
+        </p>
+      </div>
+      {% endif %}
+
+      <!-- Director -->
+      {% if content.director %}
+      <div style="margin-bottom:16px;">
+        <span style="font-size:11px;font-weight:700;letter-spacing:1.5px;
+                     text-transform:uppercase;color:var(--muted);">Director</span>
+        <div style="margin-top:6px;">
+          <a href="{% url 'search_people' %}?q={{ content.director|urlencode }}"
+             style="color:var(--text);font-size:14px;font-weight:500;text-decoration:none;
+                    border-bottom:1px solid var(--border);transition:border-color .2s;"
+             onmouseover="this.style.borderColor='var(--red)'"
+             onmouseout="this.style.borderColor='var(--border)'">
+            🎬 {{ content.director }}
+          </a>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Cast -->
+      {% if cast_list %}
+      <div style="margin-bottom:24px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;
+                    text-transform:uppercase;color:var(--muted);margin-bottom:10px;">
+          Cast
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          {% for actor in cast_list|slice:":12" %}
+          <a href="{% url 'search_people' %}?q={{ actor|urlencode }}"
+             style="padding:6px 14px;border-radius:20px;background:var(--surface2);
+                    color:var(--muted);font-size:12px;font-weight:500;text-decoration:none;
+                    border:1px solid var(--border);transition:all .2s;"
+             onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--text)';"
+             onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">
+            🎭 {{ actor }}
+          </a>
+          {% endfor %}
+          {% if cast_list|length > 12 %}
+          <span style="padding:6px 14px;border-radius:20px;background:var(--surface2);
+                       color:var(--muted);font-size:12px;border:1px solid var(--border);">
+            +{{ cast_list|length|add:"-12" }} more
+          </span>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Rating -->
+      <div style="margin-top:8px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;
+                    text-transform:uppercase;color:var(--muted);margin-bottom:10px;">
+          Your Rating
+        </div>
+        {% if user_score %}
+        <div class="rated-check" style="font-size:16px;" id="ratingDisplay">
+          ✓ Rated {{ user_score }}/5
+        </div>
+        <button onclick="document.getElementById('ratingDisplay').style.display='none';
+                         document.getElementById('ratingForm').style.display='block';"
+                style="margin-top:8px;background:none;border:none;color:var(--muted);
+                       font-size:12px;cursor:pointer;text-decoration:underline;
+                       font-family:'DM Sans',sans-serif;">
+          Change rating
+        </button>
+        {% endif %}
+
+        <form method="post" id="ratingForm" {% if user_score %}style="display:none;"{% endif %}>
+          {% csrf_token %}
+          <div class="star-rating" id="detailStars">
+            {% for i in "12345" %}
+            <span class="star"
+                  style="font-size:28px;"
+                  data-val="{{ forloop.counter }}"
+                  onclick="submitRating({{ forloop.counter }})">★</span>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="score" id="scoreInput" value="">
+          <button type="submit" id="rateBtn"
+                  style="display:none;margin-top:12px;background:var(--red);color:#fff;
+                         border:none;border-radius:8px;padding:10px 24px;font-size:14px;
+                         font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">
+            Save Rating
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Similar titles -->
+  {% if similar %}
+  <div style="margin-top:16px;">
+    <div class="section-header" style="margin-bottom:20px;">
+      <span class="section-title"
+            style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;">
+        More Like This
+      </span>
+    </div>
+    <div class="grid">
+      {% for item in similar %}
+      <a href="{% url 'title_detail' item.pk %}" style="text-decoration:none;color:inherit;">
+        <div class="card" style="cursor:pointer;transition:transform .2s;"
+             onmouseover="this.style.transform='translateY(-4px)'"
+             onmouseout="this.style.transform='translateY(0)'">
+          <div class="card-poster-placeholder"
+               style="background:linear-gradient(135deg,
+                 hsl({{ forloop.counter0|add:200 }},25%,12%),
+                 hsl({{ forloop.counter0|add:240 }},20%,8%));">
+            <div class="icon">{% if item.type == 'TV Show' %}📺{% else %}🎬{% endif %}</div>
+            <div style="font-size:10px;color:#555;">{{ item.title|truncatechars:25 }}</div>
+          </div>
+          <div class="card-body">
+            <div class="card-title" style="font-size:13px;">{{ item.title|truncatechars:35 }}</div>
+            <div class="card-meta">
+              <span class="badge badge-platform-{{ item.platform|truncatewords:1|cut:' ' }}">
+                {{ item.platform }}
+              </span>
+              {% if item.release_year %}
+              <span class="badge">{{ item.release_year }}</span>
+              {% endif %}
+            </div>
+            <div style="font-size:11px;color:var(--muted);overflow:hidden;
+                        text-overflow:ellipsis;white-space:nowrap;">
+              {{ item.genres|truncatechars:35 }}
+            </div>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+function submitRating(val) {
+  // Light up stars
+  document.querySelectorAll('#detailStars .star').forEach((s, i) => {
+    s.classList.toggle('lit', i < val);
+  });
+  document.getElementById('scoreInput').value = val;
+  document.getElementById('rateBtn').style.display = 'block';
+}
+</script>
+{% endblock %}

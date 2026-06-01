@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-wrap">
+
+  <!-- Header -->
+  <div style="margin-bottom:32px;">
+    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;margin-bottom:6px;">
+      Search by Actor or Director
+    </h1>
+    <p style="color:var(--muted);font-size:14px;">
+      Type a name to find all titles they appear in or directed.
+    </p>
+  </div>
+
+  <!-- Search bar -->
+  <form method="get" action="{% url 'search_people' %}">
+    <div class="search-wrap" style="margin-bottom:16px;">
+      <span class="search-icon">🎭</span>
+      <input
+        type="text"
+        name="q"
+        value="{{ query }}"
+        placeholder="e.g. Leonardo DiCaprio, Christopher Nolan…"
+        autofocus
+        style="padding-right:120px;">
+      <button type="submit"
+        style="position:absolute;right:8px;top:50%;transform:translateY(-50%);
+               background:var(--red);color:#fff;border:none;border-radius:8px;
+               padding:8px 20px;font-family:'DM Sans',sans-serif;font-size:14px;
+               font-weight:600;cursor:pointer;">
+        Search
+      </button>
+    </div>
+  </form>
+
+  {% if error_message %}
+  <div style="background:#2a1a1a;border:1px solid #661a1a;border-radius:8px;padding:16px;margin-bottom:20px;color:#ff6b6b;">
+    <strong>Error:</strong> {{ error_message }}
+  </div>
+  {% endif %}
+
+  <!-- Results -->
+  {% if query %}
+    {% if results %}
+      <!-- Summary badge -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;flex-wrap:wrap;">
+        <div class="section-title" style="font-family:'Bebas Neue',sans-serif;font-size:24px;">
+          Results for "{{ query }}"
+        </div>
+        <span class="badge" style="font-size:12px;padding:5px 12px;">
+          {{ count }} title{{ count|pluralize }}
+        </span>
+        {% if search_type == 'actor' %}
+          <span class="badge" style="background:#1a3a1a;color:#4caf50;border-color:#2d5a2d;">🎭 Found as actor</span>
+        {% elif search_type == 'director' %}
+          <span class="badge" style="background:#1a1a3a;color:#6b9fff;border-color:#2d2d5a;">🎬 Found as director</span>
+        {% elif search_type == 'both' %}
+          <span class="badge" style="background:#1a3a1a;color:#4caf50;border-color:#2d5a2d;">🎭 Actor</span>
+          <span class="badge" style="background:#1a1a3a;color:#6b9fff;border-color:#2d2d5a;">🎬 Director</span>
+        {% endif %}
+      </div>
+
+      <div class="grid stagger">
+        {% for item in results %}
+        <div class="card">
+          <!-- Poster placeholder -->
+          <div class="card-poster-placeholder"
+            style="background:linear-gradient(135deg,hsl({{ forloop.counter0|add:200 }},25%,12%),hsl({{ forloop.counter0|add:240 }},20%,8%));">
+            <div class="icon">{% if item.type == 'TV Show' %}📺{% else %}🎬{% endif %}</div>
+            <div style="font-size:11px;color:#555;line-height:1.4;">{{ item.title|truncatechars:28 }}</div>
+          </div>
+
+          <div class="card-body">
+            <div class="card-title" title="{{ item.title }}">{{ item.title }}</div>
+
+            <div class="card-meta">
+              <span class="badge badge-platform-{{ item.platform|truncatewords:1|cut:' ' }}">{{ item.platform }}</span>
+              {% if item.release_year %}<span class="badge">{{ item.release_year }}</span>{% endif %}
+              {% if item.rating %}<span class="badge">{{ item.rating }}</span>{% endif %}
+            </div>
+
+            <!-- Highlight matching role -->
+            {% if item.director and query|lower in item.director|lower %}
+            <div style="font-size:11px;color:#6b9fff;margin-bottom:6px;">
+              🎬 Director: {{ item.director }}
+            </div>
+            {% endif %}
+
+            {% if item.cast and query|lower in item.cast|lower %}
+            <div style="font-size:11px;color:#4caf50;margin-bottom:6px;
+                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                 title="{{ item.cast }}">
+              🎭 Cast: {{ item.cast|truncatechars:60 }}
+            </div>
+            {% endif %}
+
+            {% if item.genres %}
+            <div style="font-size:11px;color:var(--muted);
+                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              {{ item.genres|truncatechars:45 }}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <!-- No results -->
+      <div class="empty-state fade-in">
+        <div class="icon">🔍</div>
+        <h2>No results for "{{ query }}"</h2>
+        <p>Try a different spelling or a partial name (e.g. "Nolan" instead of "Christopher Nolan").</p>
+      </div>
+    {% endif %}
+
+  {% else %}
+    <!-- Initial state — show suggestions -->
+    <div style="margin-top:48px;">
+      <div style="font-size:12px;font-weight:600;letter-spacing:1.5px;
+                  text-transform:uppercase;color:var(--muted);margin-bottom:16px;">
+        Try searching for
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+{% for name in suggestions %}
+<a href="?q={{ name }}"
+   style="padding:8px 18px;border-radius:20px;border:1px solid var(--border);
+          background:var(--surface);color:var(--muted);text-decoration:none;
+          font-size:13px;font-weight:500;transition:all .2s;"
+   onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--text)';"
+   onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">
+  {{ name }}
+</a>
+{% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

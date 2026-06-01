@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content fade-in">
+    <span class="hero-badge">AI-Powered Recommendations</span>
+    <h1>Find Your Next Obsession</h1>
+    <p>22,000+ movies and shows across Netflix, Prime, Disney+, and Hulu — curated to exactly what you love.</p>
+    <div class="hero-actions">
+      <a href="/register/" class="btn btn-primary">Get Started Free</a>
+      <a href="/login/" class="btn btn-ghost">Sign In</a>
+    </div>
+  </div>
+</section>
+
+<div style="padding:60px 64px;">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:900px;" class="stagger">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
+      <div style="font-size:28px;margin-bottom:12px;">🎯</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:8px;">Smart Matching</div>
+      <div style="color:var(--muted);font-size:14px;line-height:1.6;">Tell us your genres, platforms, and ratings. We'll surface what fits.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
+      <div style="font-size:28px;margin-bottom:12px;">⭐</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:8px;">Rate & Refine</div>
+      <div style="color:var(--muted);font-size:14px;line-height:1.6;">Score what you watch. The more you rate, the better your recommendations get.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
+      <div style="font-size:28px;margin-bottom:12px;">🌍</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:8px;">All Platforms</div>
+      <div style="color:var(--muted);font-size:14px;line-height:1.6;">Netflix, Amazon Prime, Disney+, Hulu — all in one place.</div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

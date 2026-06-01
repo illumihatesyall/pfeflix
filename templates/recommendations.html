@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-wrap">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
+    <div>
+      <h1 style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;">
+        {% if pref %}Picked For You{% else %}Discover{% endif %}
+      </h1>
+      {% if pref and pref.genres %}
+      <div style="color:var(--muted);font-size:14px;margin-top:4px;">
+        Based on: <span style="color:var(--text);">{{ pref.genres|truncatechars:60 }}</span>
+        {% if pref.platform %} · <span style="color:var(--text);">{{ pref.platform }}</span>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+    <a href="/profile/{{ request.user.username }}/" class="btn btn-ghost btn-sm" style="margin-right:8px;">👤 My Profile</a>
+    <a href="/questionnaire/" class="btn btn-ghost btn-sm">⚙ Edit Preferences</a>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search titles…" oninput="filterCards()">
+  </div>
+
+  <!-- Filter chips -->
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-chip active" data-filter="all" onclick="setFilter('all',this)">All</button>
+    <button class="filter-chip" data-filter="Movie" onclick="setFilter('Movie',this)">🎬 Movies</button>
+    <button class="filter-chip" data-filter="TV Show" onclick="setFilter('TV Show',this)">📺 TV Shows</button>
+    <button class="filter-chip" data-filter="rated" onclick="setFilter('rated',this)">⭐ Rated by me</button>
+  </div>
+
+  <!-- Grid -->
+  {% if movies %}
+  <div class="section-header">
+    <span class="section-title">Results</span>
+    <span class="section-count" id="countLabel">{{ movies|length }} titles</span>
+  </div>
+
+  <div class="grid stagger" id="movieGrid">
+    {% for movie in movies %}
+    <a href="/title/{{ movie.pk }}/" style="text-decoration:none;color:inherit;">
+    <div class="card movie-card"
+      data-title="{{ movie.title|lower }}"
+      data-type="{{ movie.type }}"
+      data-rated="{% if movie.rated %}rated{% endif %}">
+
+      <!-- Poster placeholder with gradient -->
+      <div class="card-poster-placeholder"
+        style="background:linear-gradient(135deg,
+          hsl({{ forloop.counter0|add:0|divisibleby:5|yesno:'220,260,300,340,20' }},30%,14%),
+          hsl({{ forloop.counter0|add:40 }},25%,10%));">
+        <div class="icon">
+          {% if movie.type == 'TV Show' %}📺{% else %}🎬{% endif %}
+        </div>
+        <div style="font-size:11px;line-height:1.4;color:#555;">{{ movie.title|truncatechars:30 }}</div>
+      </div>
+
+      <div class="card-body">
+        <div class="card-title" title="{{ movie.title }}">{{ movie.title }}</div>
+        <div class="card-meta">
+          <span class="badge badge-platform-{{ movie.platform|truncatewords:1|cut:' ' }}">{{ movie.platform }}</span>
+          {% if movie.release_year %}<span class="badge">{{ movie.release_year }}</span>{% endif %}
+          {% if movie.rating %}<span class="badge">{{ movie.rating }}</span>{% endif %}
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          {{ movie.genres|truncatechars:40 }}
+        </div>
+
+        <!-- Star rating -->
+        {% if movie.rated %}
+        <div class="rated-check">✓ Rated {{ movie.user_rating|floatformat:0 }}/5</div>
+        {% else %}
+        <div class="star-rating" data-title="{{ movie.title }}">
+          {% for i in "12345" %}
+          <span class="star" data-val="{{ forloop.counter }}" onclick="rateMovie('{{ movie.title|escapejs }}', {{ forloop.counter }}, this)">★</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state fade-in">
+    <div class="icon">🎬</div>
+    <h2>No results yet</h2>
+    <p>Set your preferences and we'll find titles you'll love.</p>
+    <a href="/questionnaire/" class="btn btn-primary">Set Preferences</a>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+let activeFilter = 'all';
+
+function filterCards(){
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const cards = document.querySelectorAll('.movie-card');
+  let visible = 0;
+  cards.forEach(c => {
+    const titleMatch = c.dataset.title.includes(q);
+    const typeMatch = activeFilter === 'all' || c.dataset.type === activeFilter
+                   || (activeFilter === 'rated' && c.dataset.rated === 'rated');
+    c.style.display = (titleMatch && typeMatch) ? '' : 'none';
+    if(titleMatch && typeMatch) visible++;
+  });
+  document.getElementById('countLabel').textContent = visible + ' titles';
+}
+
+function setFilter(f, btn){
+  activeFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterCards();
+}
+
+function rateMovie(title, val, starEl){
+  // Light up stars
+  const container = starEl.parentElement;
+  container.querySelectorAll('.star').forEach((s,i) => {
+    s.classList.toggle('lit', i < val);
+  });
+
+  // POST rating via AJAX
+  const form = new FormData();
+  form.append('score', val);
+  form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+  fetch('/rate/' + encodeURIComponent(title) + '/', {
+    method:'POST',
+    headers:{'X-Requested-With':'XMLHttpRequest'},
+    body: form
+  }).then(r => r.json()).then(() => {
+    // Replace stars with confirmation
+    const card = container.closest('.card-body');
+    container.outerHTML = '<div class="rated-check">✓ Rated ' + val + '/5</div>';
+    // Update data-rated on card
+    const cardEl = card.closest('.movie-card');
+    cardEl.dataset.rated = 'rated';
+    showToast('Rated "' + title.substring(0,28) + '"', '⭐');
+  });
+}
+</script>
+{% endblock %}

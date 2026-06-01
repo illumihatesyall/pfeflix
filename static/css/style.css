@@ -1,0 +1,22 @@
+body{
+    background:#111;
+    color:white;
+    font-family:Arial;
+    margin:0;
+}
+
+nav{
+    background:#e50914;
+    padding:15px;
+}
+
+.container{
+    padding:40px;
+}
+
+a{
+    background:#e50914;
+    color:white;
+    padding:10px 20px;
+    text-decoration:none;
+}
