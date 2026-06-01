@@ -57,7 +57,15 @@ def recommendations(request):
     except UserPreference.DoesNotExist:
         pref = None
 
-    qs = Content.objects.all()
+    try:
+        qs = Content.objects.all()
+    except Exception as e:
+        # If database query fails, show error
+        return render(request, 'recommendations.html', {
+            'error': f'Database error: {str(e)}',
+            'movies': [],
+            'pref': pref,
+        })
 
     if pref:
         if pref.platform:
