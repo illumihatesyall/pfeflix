@@ -11,26 +11,26 @@
       {% if pref and pref.genres %}
       <div style="color:var(--muted);font-size:14px;margin-top:4px;">
         Based on: <span style="color:var(--text);">{{ pref.genres|truncatechars:60 }}</span>
-        {% if pref.platform %} · <span style="color:var(--text);">{{ pref.platform }}</span>{% endif %}
+        {% if pref.platform %} Â· <span style="color:var(--text);">{{ pref.platform }}</span>{% endif %}
       </div>
       {% endif %}
     </div>
-    <a href="/profile/{{ request.user.username }}/" class="btn btn-ghost btn-sm" style="margin-right:8px;">👤 My Profile</a>
-    <a href="/questionnaire/" class="btn btn-ghost btn-sm">⚙ Edit Preferences</a>
+    <a href="/profile/{{ request.user.username }}/" class="btn btn-ghost btn-sm" style="margin-right:8px;">ðŸ‘¤ My Profile</a>
+    <a href="/questionnaire/" class="btn btn-ghost btn-sm">âš™ Edit Preferences</a>
   </div>
 
   <!-- Search -->
   <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="Search titles…" oninput="filterCards()">
+    <span class="search-icon">ðŸ”</span>
+    <input type="text" id="searchInput" placeholder="Search titlesâ€¦" oninput="filterCards()">
   </div>
 
   <!-- Filter chips -->
   <div class="filter-bar" id="filterBar">
     <button class="filter-chip active" data-filter="all" onclick="setFilter('all',this)">All</button>
-    <button class="filter-chip" data-filter="Movie" onclick="setFilter('Movie',this)">🎬 Movies</button>
-    <button class="filter-chip" data-filter="TV Show" onclick="setFilter('TV Show',this)">📺 TV Shows</button>
-    <button class="filter-chip" data-filter="rated" onclick="setFilter('rated',this)">⭐ Rated by me</button>
+    <button class="filter-chip" data-filter="Movie" onclick="setFilter('Movie',this)">ðŸŽ¬ Movies</button>
+    <button class="filter-chip" data-filter="TV Show" onclick="setFilter('TV Show',this)">ðŸ“º TV Shows</button>
+    <button class="filter-chip" data-filter="rated" onclick="setFilter('rated',this)">â­ Rated by me</button>
   </div>
 
   <!-- Grid -->
@@ -48,18 +48,15 @@
       data-type="{{ movie.type }}"
       data-rated="{% if movie.rated %}rated{% endif %}">
 
+      <!-- Poster placeholder with gradient -->
       <div class="card-poster-placeholder"
-        data-poster-title="{{ movie.title|escapejs }}"
-        data-poster-year="{{ movie.release_year }}"
-        data-poster-type="{{ movie.type }}"
-        style="position:relative;background:linear-gradient(135deg,hsl(220,30%,14%),hsl(260,25%,10%));">
-        <img src="" alt="{{ movie.title }}"
-          class="card-poster-img"
-          style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:none;border-radius:inherit;">
-        <div class="poster-fallback">
-          <div class="icon">{% if movie.type == 'TV Show' %}📺{% else %}🎬{% endif %}</div>
-          <div style="font-size:11px;line-height:1.4;color:#555;">{{ movie.title|truncatechars:30 }}</div>
+        style="background:linear-gradient(135deg,
+          hsl({{ forloop.counter0|add:0|divisibleby:5|yesno:'220,260,300,340,20' }},30%,14%),
+          hsl({{ forloop.counter0|add:40 }},25%,10%));">
+        <div class="icon">
+          {% if movie.type == 'TV Show' %}ðŸ“º{% else %}ðŸŽ¬{% endif %}
         </div>
+        <div style="font-size:11px;line-height:1.4;color:#555;">{{ movie.title|truncatechars:30 }}</div>
       </div>
 
       <div class="card-body">
@@ -72,12 +69,14 @@
         <div style="font-size:11px;color:var(--muted);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
           {{ movie.genres|truncatechars:40 }}
         </div>
+
+        <!-- Star rating -->
         {% if movie.rated %}
-        <div class="rated-check">✓ Rated {{ movie.user_rating|floatformat:0 }}/5</div>
+        <div class="rated-check">âœ“ Rated {{ movie.user_rating|floatformat:0 }}/5</div>
         {% else %}
         <div class="star-rating" data-title="{{ movie.title }}">
           {% for i in "12345" %}
-          <span class="star" data-val="{{ forloop.counter }}" onclick="rateMovie('{{ movie.title|escapejs }}', {{ forloop.counter }}, this)">★</span>
+          <span class="star" data-val="{{ forloop.counter }}" onclick="rateMovie('{{ movie.title|escapejs }}', {{ forloop.counter }}, this)">â˜…</span>
           {% endfor %}
         </div>
         {% endif %}
@@ -89,7 +88,7 @@
 
   {% else %}
   <div class="empty-state fade-in">
-    <div class="icon">🎬</div>
+    <div class="icon">ðŸŽ¬</div>
     <h2>No results yet</h2>
     <p>Set your preferences and we'll find titles you'll love.</p>
     <a href="/questionnaire/" class="btn btn-primary">Set Preferences</a>
@@ -123,57 +122,30 @@ function setFilter(f, btn){
 }
 
 function rateMovie(title, val, starEl){
-  event.preventDefault();
-  event.stopPropagation();
+  // Light up stars
   const container = starEl.parentElement;
   container.querySelectorAll('.star').forEach((s,i) => {
     s.classList.toggle('lit', i < val);
   });
+
+  // POST rating via AJAX
   const form = new FormData();
   form.append('score', val);
   form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
   fetch('/rate/' + encodeURIComponent(title) + '/', {
     method:'POST',
     headers:{'X-Requested-With':'XMLHttpRequest'},
     body: form
   }).then(r => r.json()).then(() => {
+    // Replace stars with confirmation
     const card = container.closest('.card-body');
-    container.outerHTML = '<div class="rated-check">✓ Rated ' + val + '/5</div>';
+    container.outerHTML = '<div class="rated-check">âœ“ Rated ' + val + '/5</div>';
+    // Update data-rated on card
     const cardEl = card.closest('.movie-card');
     cardEl.dataset.rated = 'rated';
-    showToast('Rated "' + title.substring(0,28) + '"', '⭐');
+    showToast('Rated "' + title.substring(0,28) + '"', 'â­');
   });
 }
-
-function loadPoster(placeholder) {
-  const title = placeholder.dataset.posterTitle;
-  const year  = placeholder.dataset.posterYear;
-  const type  = placeholder.dataset.posterType;
-  const img   = placeholder.querySelector('.card-poster-img');
-  const fallback = placeholder.querySelector('.poster-fallback');
-  if (!title || placeholder.dataset.loaded) return;
-  placeholder.dataset.loaded = '1';
-  fetch('/poster/?title=' + encodeURIComponent(title) + '&year=' + encodeURIComponent(year) + '&type=' + encodeURIComponent(type))
-    .then(r => r.json())
-    .then(data => {
-      if (data.url) {
-        img.src = data.url;
-        img.style.display = 'block';
-        if (fallback) fallback.style.display = 'none';
-      }
-    })
-    .catch(() => {});
-}
-
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      loadPoster(e.target);
-      observer.unobserve(e.target);
-    }
-  });
-}, { rootMargin: '200px' });
-
-document.querySelectorAll('[data-poster-title]').forEach(el => observer.observe(el));
 </script>
 {% endblock %}

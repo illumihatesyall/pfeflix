@@ -15,6 +15,7 @@
       </div>
       {% endif %}
     </div>
+    <a href="/profile/{{ request.user.username }}/" class="btn btn-ghost btn-sm" style="margin-right:8px;">👤 My Profile</a>
     <a href="/questionnaire/" class="btn btn-ghost btn-sm">⚙ Edit Preferences</a>
   </div>
 
@@ -41,32 +42,31 @@
 
   <div class="grid stagger" id="movieGrid">
     {% for movie in movies %}
+    <a href="/title/{{ movie.pk }}/" style="text-decoration:none;color:inherit;">
     <div class="card movie-card"
       data-title="{{ movie.title|lower }}"
       data-type="{{ movie.type }}"
       data-rated="{% if movie.rated %}rated{% endif %}">
 
-      <!-- Poster placeholder — click to open detail page -->
-      <a href="/title/{{ movie.pk }}/" style="text-decoration:none;display:block;">
-        <div class="card-poster-placeholder"
-          style="background:linear-gradient(135deg,
-            hsl({{ forloop.counter0|add:0|divisibleby:5|yesno:'220,260,300,340,20' }},30%,14%),
-            hsl({{ forloop.counter0|add:40 }},25%,10%));
-            transition:opacity .2s;"
-          onmouseover="this.style.opacity='.85'"
-          onmouseout="this.style.opacity='1'">
-          <div class="icon">
-            {% if movie.type == 'TV Show' %}📺{% else %}🎬{% endif %}
-          </div>
+      <!-- Poster: loads lazily via JS -->
+      <div class="card-poster-placeholder"
+        data-poster-title="{{ movie.title|escapejs }}"
+        data-poster-year="{{ movie.release_year }}"
+        data-poster-type="{{ movie.type }}"
+        style="position:relative;background:linear-gradient(135deg,
+          hsl({{ forloop.counter0|add:220 }},30%,14%),
+          hsl({{ forloop.counter0|add:260 }},25%,10%));">
+        <img src="" alt="{{ movie.title }}"
+          class="card-poster-img"
+          style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:none;border-radius:inherit;">
+        <div class="poster-fallback">
+          <div class="icon">{% if movie.type == 'TV Show' %}📺{% else %}🎬{% endif %}</div>
           <div style="font-size:11px;line-height:1.4;color:#555;">{{ movie.title|truncatechars:30 }}</div>
-          <div style="font-size:10px;color:var(--red);margin-top:6px;font-weight:600;">View Details →</div>
         </div>
-      </a>
+      </div>
 
       <div class="card-body">
-        <a href="/title/{{ movie.pk }}/" style="text-decoration:none;color:inherit;">
-        <div class="card-title" title="{{ movie.title }}" style="transition:color .2s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color=''">{{ movie.title }}</div>
-        </a>
+        <div class="card-title" title="{{ movie.title }}">{{ movie.title }}</div>
         <div class="card-meta">
           <span class="badge badge-platform-{{ movie.platform|truncatewords:1|cut:' ' }}">{{ movie.platform }}</span>
           {% if movie.release_year %}<span class="badge">{{ movie.release_year }}</span>{% endif %}
@@ -88,6 +88,7 @@
         {% endif %}
       </div>
     </div>
+    </a>
     {% endfor %}
   </div>
 
@@ -127,13 +128,13 @@ function setFilter(f, btn){
 }
 
 function rateMovie(title, val, starEl){
-  // Light up stars
+  event.preventDefault();
+  event.stopPropagation();
   const container = starEl.parentElement;
   container.querySelectorAll('.star').forEach((s,i) => {
     s.classList.toggle('lit', i < val);
   });
 
-  // POST rating via AJAX
   const form = new FormData();
   form.append('score', val);
   form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
@@ -143,14 +144,46 @@ function rateMovie(title, val, starEl){
     headers:{'X-Requested-With':'XMLHttpRequest'},
     body: form
   }).then(r => r.json()).then(() => {
-    // Replace stars with confirmation
     const card = container.closest('.card-body');
     container.outerHTML = '<div class="rated-check">✓ Rated ' + val + '/5</div>';
-    // Update data-rated on card
     const cardEl = card.closest('.movie-card');
     cardEl.dataset.rated = 'rated';
     showToast('Rated "' + title.substring(0,28) + '"', '⭐');
   });
 }
+
+// Lazy poster loading using IntersectionObserver
+function loadPoster(placeholder) {
+  const title = placeholder.dataset.posterTitle;
+  const year  = placeholder.dataset.posterYear;
+  const type  = placeholder.dataset.posterType;
+  const img   = placeholder.querySelector('.card-poster-img');
+  const fallback = placeholder.querySelector('.poster-fallback');
+
+  if (!title || placeholder.dataset.loaded) return;
+  placeholder.dataset.loaded = '1';
+
+  fetch('/poster/?title=' + encodeURIComponent(title) + '&year=' + encodeURIComponent(year) + '&type=' + encodeURIComponent(type))
+    .then(r => r.json())
+    .then(data => {
+      if (data.url) {
+        img.src = data.url;
+        img.style.display = 'block';
+        if (fallback) fallback.style.display = 'none';
+      }
+    })
+    .catch(() => {});
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      loadPoster(e.target);
+      observer.unobserve(e.target);
+    }
+  });
+}, { rootMargin: '200px' });
+
+document.querySelectorAll('[data-poster-title]').forEach(el => observer.observe(el));
 </script>
 {% endblock %}

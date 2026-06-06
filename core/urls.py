@@ -1,4 +1,4 @@
-from django.urls import path
+﻿from django.urls import path
 from . import views
 from django.contrib.auth.views import LoginView
 
@@ -14,4 +14,6 @@ urlpatterns = [
     path('title/<int:pk>/',      views.title_detail,   name='title_detail'),
     path('users/',               views.users_list,     name='users_list'),
     path('profile/<str:username>/', views.user_profile, name='user_profile'),
+    path('poster/', views.get_poster, name='get_poster'),
 ]
+
