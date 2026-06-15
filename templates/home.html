@@ -8,29 +8,76 @@
     <h1>Find Your Next Obsession</h1>
     <p>22,000+ movies and shows across Netflix, Prime, Disney+, and Hulu — curated to exactly what you love.</p>
     <div class="hero-actions">
+      {% if user.is_authenticated %}
+      <a href="/recommendations/" class="btn btn-primary">My Recommendations</a>
+      <a href="/questionnaire/" class="btn btn-ghost">Edit Preferences</a>
+      {% else %}
       <a href="/register/" class="btn btn-primary">Get Started Free</a>
       <a href="/login/" class="btn btn-ghost">Sign In</a>
+      {% endif %}
     </div>
   </div>
 </section>
 
-<div style="padding:60px 64px;">
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:900px;" class="stagger">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
-      <div style="font-size:28px;margin-bottom:12px;">🎯</div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:8px;">Smart Matching</div>
-      <div style="color:var(--muted);font-size:14px;line-height:1.6;">Tell us your genres, platforms, and ratings. We'll surface what fits.</div>
+<!-- Feature cards -->
+<div style="padding: 64px 64px 80px;">
+
+  <div style="text-align:center; margin-bottom: 48px;">
+    <div style="font-family:'Bebas Neue',sans-serif; font-size:36px; letter-spacing:2px; margin-bottom:10px;">
+      How It Works
     </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
-      <div style="font-size:28px;margin-bottom:12px;">⭐</div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:8px;">Rate & Refine</div>
-      <div style="color:var(--muted);font-size:14px;line-height:1.6;">Score what you watch. The more you rate, the better your recommendations get.</div>
+    <div style="color:var(--muted); font-size:15px; max-width:480px; margin:0 auto; line-height:1.6;">
+      A recommendation engine that actually learns what you like.
     </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;">
-      <div style="font-size:28px;margin-bottom:12px;">🌍</div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:8px;">All Platforms</div>
-      <div style="color:var(--muted);font-size:14px;line-height:1.6;">Netflix, Amazon Prime, Disney+, Hulu — all in one place.</div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:24px; max-width:960px; margin:0 auto;" class="stagger">
+
+    <div style="background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius); padding:32px;
+                backdrop-filter:var(--blur); transition:border-color .25s, transform .25s;"
+         onmouseover="this.style.borderColor='rgba(108,99,255,0.4)';this.style.transform='translateY(-4px)';"
+         onmouseout="this.style.borderColor='var(--glass-border)';this.style.transform='translateY(0)';">
+      <div style="margin-bottom:16px; color:var(--purple);">
+        <i data-lucide="target" style="width:36px;height:36px;"></i>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; margin-bottom:10px; color:var(--text);">
+        Smart Matching
+      </div>
+      <div style="color:var(--muted); font-size:14px; line-height:1.65;">
+        Tell us your genres, platforms, and mood. Our hybrid AI surfaces titles that genuinely fit your taste.
+      </div>
     </div>
+
+    <div style="background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius); padding:32px;
+                backdrop-filter:var(--blur); transition:border-color .25s, transform .25s;"
+         onmouseover="this.style.borderColor='rgba(229,9,20,0.4)';this.style.transform='translateY(-4px)';"
+         onmouseout="this.style.borderColor='var(--glass-border)';this.style.transform='translateY(0)';">
+      <div style="margin-bottom:16px; color:#f5c518;">
+        <i data-lucide="star" style="width:36px;height:36px;"></i>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; margin-bottom:10px; color:var(--text);">
+        Rate &amp; Refine
+      </div>
+      <div style="color:var(--muted); font-size:14px; line-height:1.65;">
+        Score what you watch. The more you rate, the sharper your recommendations get — it actually improves.
+      </div>
+    </div>
+
+    <div style="background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius); padding:32px;
+                backdrop-filter:var(--blur); transition:border-color .25s, transform .25s;"
+         onmouseover="this.style.borderColor='rgba(108,99,255,0.4)';this.style.transform='translateY(-4px)';"
+         onmouseout="this.style.borderColor='var(--glass-border)';this.style.transform='translateY(0)';">
+      <div style="margin-bottom:16px; color:var(--purple);">
+        <i data-lucide="globe" style="width:36px;height:36px;"></i>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; margin-bottom:10px; color:var(--text);">
+        All Platforms
+      </div>
+      <div style="color:var(--muted); font-size:14px; line-height:1.65;">
+        Netflix, Amazon Prime, Disney+, Hulu — everything in one place, filtered to what's right for you.
+      </div>
+    </div>
+
   </div>
 </div>
 

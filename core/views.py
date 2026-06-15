@@ -1,8 +1,9 @@
-﻿from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import Q
+from django.core.cache import cache
 from .forms import PreferenceForm, RegisterForm
 import requests as http_requests
 import os
@@ -59,6 +60,7 @@ def register(request):
     return render(request, 'register.html', {'form': form})
 
 
+@login_required
 def questionnaire(request):
     from .models import UserPreference
     try:
@@ -73,6 +75,9 @@ def questionnaire(request):
             if not pref.duration:
                 pref.duration = ''
             pref.save()
+            # Invalidate this user's cached recommendations so new
+            # preferences are reflected on the next visit
+            cache.delete(f'pfeflix_rec_{request.user.id}')
             return redirect('recommendations')
     else:
         initial = {}
@@ -82,49 +87,35 @@ def questionnaire(request):
     return render(request, 'questionnaire.html', {'form': form})
 
 
+@login_required
 def recommendations(request):
-    from .models import Content, UserPreference, Rating
+    from .models import UserPreference, Rating
+    from recommender import recommend_for_user
+
     try:
         pref = UserPreference.objects.get(user=request.user)
     except UserPreference.DoesNotExist:
         pref = None
+
     try:
-        qs = Content.objects.all()
+        content_list = recommend_for_user(request.user.id, n=24)
     except Exception as e:
         return render(request, 'recommendations.html', {
-            'error': 'Database error: ' + str(e),
+            'error': 'Recommendation error: ' + str(e),
             'movies': [],
             'pref': pref,
         })
-    if pref:
-        if pref.platform:
-            qs = qs.filter(platform=pref.platform)
-        if pref.content_type:
-            qs = qs.filter(type=pref.content_type)
-        rating_order = ['Kids', 'General', 'PG', 'Teen', 'Adult', 'Unrated']
-        if pref.max_rating and pref.max_rating in rating_order:
-            allowed = rating_order[:rating_order.index(pref.max_rating) + 1]
-            qs = qs.filter(rating__in=allowed)
-        user_genres = [g.strip().lower() for g in pref.genres.split(',') if g.strip()]
-        if user_genres:
-            content_list = list(qs[:500])
-            def score(item):
-                item_genres = item.genres.lower()
-                return sum(1 for g in user_genres if g in item_genres)
-            content_list.sort(key=score, reverse=True)
-            content_list = content_list[:60]
-        else:
-            content_list = list(qs[:60])
-    else:
-        content_list = list(qs[:60])
+
     rated_titles = set(Rating.objects.filter(user=request.user).values_list('title', flat=True))
     user_ratings = dict(Rating.objects.filter(user=request.user).values_list('title', 'score'))
     for item in content_list:
         item.user_rating = user_ratings.get(item.title)
         item.rated = item.title in rated_titles
+
     return render(request, 'recommendations.html', {'movies': content_list, 'pref': pref})
 
 
+@login_required
 def rate_movie(request, title):
     from .models import Rating
     if request.method == 'POST':
@@ -136,6 +127,10 @@ def rate_movie(request, title):
         Rating.objects.update_or_create(
             user=request.user, title=title, defaults={'score': score}
         )
+        # A new rating changes the recommendations — bust both caches
+        cache.delete(f'pfeflix_rec_{request.user.id}')
+        cache.delete('pfeflix_ratings')
+
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'status': 'ok', 'score': score})
     return redirect('recommendations')
@@ -172,6 +167,7 @@ def search_people(request):
     })
 
 
+@login_required
 def title_detail(request, pk):
     from .models import Content, Rating
     content = get_object_or_404(Content, pk=pk)
@@ -188,6 +184,9 @@ def title_detail(request, pk):
                 Rating.objects.update_or_create(
                     user=request.user, title=content.title, defaults={'score': score}
                 )
+                # Bust caches when rating from the detail page too
+                cache.delete(f'pfeflix_rec_{request.user.id}')
+                cache.delete('pfeflix_ratings')
                 user_score = int(score)
             except (ValueError, TypeError):
                 pass
@@ -208,6 +207,7 @@ def title_detail(request, pk):
     })
 
 
+@login_required
 def user_profile(request, username):
     from .models import Rating, Content
     from django.contrib.auth.models import User
@@ -250,6 +250,7 @@ def user_profile(request, username):
     })
 
 
+@login_required
 def users_list(request):
     from django.contrib.auth.models import User
     from .models import Rating

@@ -63,7 +63,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'PFE.wsgi.application'
 
 # ── Database ────────────────────────────────────────────────
-# Uses DATABASE_URL env var (Railway provides this automatically)
+# Uses DATABASE_URL env var (set this in Render environment variables)
 # Falls back to SQLite for development
 DATABASE_URL = os.environ.get('DATABASE_URL')
 

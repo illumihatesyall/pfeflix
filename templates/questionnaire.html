@@ -10,13 +10,18 @@
 
       <!-- GENRES -->
       <div class="q-section">
-        <div class="q-section-title">Favorite Genres <span style="color:#555;font-size:10px;">(pick as many as you like)</span></div>
+        <div class="q-section-title">
+          Favorite Genres
+          <span style="color:var(--muted); font-size:10px; font-weight:400; letter-spacing:0; text-transform:none;">
+            — pick as many as you like
+          </span>
+        </div>
         <div class="genre-grid">
           {% for value, label in form.genres.field.choices %}
           <div class="genre-pill">
             <input type="checkbox" name="genres" value="{{ value }}"
-              id="genre_{{ forloop.counter }}"
-              {% if value in form.genres.value %}checked{% endif %}>
+                   id="genre_{{ forloop.counter }}"
+                   {% if value in form.genres.value %}checked{% endif %}>
             <label for="genre_{{ forloop.counter }}">{{ label }}</label>
           </div>
           {% endfor %}
@@ -43,7 +48,7 @@
         </select>
       </div>
 
-      <!-- RATING -->
+      <!-- MAX RATING -->
       <div class="q-section">
         <div class="q-section-title">Maximum Rating</div>
         <select name="max_rating" class="q-select">
@@ -53,7 +58,8 @@
         </select>
       </div>
 
-      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;font-size:16px;padding:15px;">
+      <button type="submit" class="btn btn-primary"
+              style="width:100%; justify-content:center; font-size:16px; padding:15px;">
         Save & Get Recommendations →
       </button>
     </form>

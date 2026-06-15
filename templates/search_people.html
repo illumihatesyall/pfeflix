@@ -2,12 +2,11 @@
 {% block content %}
 <div class="page-wrap">
 
-  <!-- Header -->
   <div style="margin-bottom:32px;">
-    <h1 style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;margin-bottom:6px;">
+    <h1 style="font-family:'Bebas Neue',sans-serif; font-size:38px; letter-spacing:1px; margin-bottom:8px;">
       Search by Actor or Director
     </h1>
-    <p style="color:var(--muted);font-size:14px;">
+    <p style="color:var(--muted); font-size:14px;">
       Type a name to find all titles they appear in or directed.
     </p>
   </div>
@@ -15,126 +14,164 @@
   <!-- Search bar -->
   <form method="get" action="{% url 'search_people' %}">
     <div class="search-wrap" style="margin-bottom:16px;">
-      <span class="search-icon">🎭</span>
-      <input
-        type="text"
-        name="q"
-        value="{{ query }}"
-        placeholder="e.g. Leonardo DiCaprio, Christopher Nolan…"
-        autofocus
-        style="padding-right:120px;">
+      <span class="search-icon">
+        <i data-lucide="users" style="width:16px;height:16px;"></i>
+      </span>
+      <input type="text" name="q" value="{{ query }}"
+             placeholder="e.g. Leonardo DiCaprio, Christopher Nolan…"
+             autofocus style="padding-right:130px;">
       <button type="submit"
-        style="position:absolute;right:8px;top:50%;transform:translateY(-50%);
-               background:var(--red);color:#fff;border:none;border-radius:8px;
-               padding:8px 20px;font-family:'DM Sans',sans-serif;font-size:14px;
-               font-weight:600;cursor:pointer;">
+              style="position:absolute; right:8px; top:50%; transform:translateY(-50%);
+                     background:var(--red); color:#fff; border:none; border-radius:20px;
+                     padding:8px 22px; font-family:'DM Sans',sans-serif; font-size:14px;
+                     font-weight:600; cursor:pointer; box-shadow:0 0 14px rgba(229,9,20,0.3);">
         Search
       </button>
     </div>
   </form>
 
   {% if error_message %}
-  <div style="background:#2a1a1a;border:1px solid #661a1a;border-radius:8px;padding:16px;margin-bottom:20px;color:#ff6b6b;">
+  <div style="background:rgba(229,9,20,0.1); border:1px solid rgba(229,9,20,0.25);
+              border-radius:var(--radius-sm); padding:16px; margin-bottom:20px; color:#ff6b6b;
+              display:flex; align-items:center; gap:10px;">
+    <i data-lucide="alert-triangle" style="width:16px;height:16px;flex-shrink:0;"></i>
     <strong>Error:</strong> {{ error_message }}
   </div>
   {% endif %}
 
-  <!-- Results -->
   {% if query %}
     {% if results %}
-      <!-- Summary badge -->
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;flex-wrap:wrap;">
-        <div class="section-title" style="font-family:'Bebas Neue',sans-serif;font-size:24px;">
-          Results for "{{ query }}"
-        </div>
-        <span class="badge" style="font-size:12px;padding:5px 12px;">
-          {{ count }} title{{ count|pluralize }}
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:28px; flex-wrap:wrap;">
+      <span class="section-title" style="font-size:22px;">Results for "{{ query }}"</span>
+      <span class="badge" style="font-size:12px; padding:5px 12px;">{{ count }} title{{ count|pluralize }}</span>
+      {% if search_type == 'actor' %}
+        <span class="badge" style="background:rgba(76,175,80,0.15); color:#4caf50; border-color:rgba(76,175,80,0.3);">
+          <i data-lucide="user" style="width:11px;height:11px;"></i> Actor
         </span>
-        {% if search_type == 'actor' %}
-          <span class="badge" style="background:#1a3a1a;color:#4caf50;border-color:#2d5a2d;">🎭 Found as actor</span>
-        {% elif search_type == 'director' %}
-          <span class="badge" style="background:#1a1a3a;color:#6b9fff;border-color:#2d2d5a;">🎬 Found as director</span>
-        {% elif search_type == 'both' %}
-          <span class="badge" style="background:#1a3a1a;color:#4caf50;border-color:#2d5a2d;">🎭 Actor</span>
-          <span class="badge" style="background:#1a1a3a;color:#6b9fff;border-color:#2d2d5a;">🎬 Director</span>
-        {% endif %}
-      </div>
+      {% elif search_type == 'director' %}
+        <span class="badge" style="background:rgba(107,159,255,0.15); color:#6b9fff; border-color:rgba(107,159,255,0.3);">
+          <i data-lucide="film" style="width:11px;height:11px;"></i> Director
+        </span>
+      {% elif search_type == 'both' %}
+        <span class="badge" style="background:rgba(76,175,80,0.15); color:#4caf50; border-color:rgba(76,175,80,0.3);">
+          <i data-lucide="user" style="width:11px;height:11px;"></i> Actor
+        </span>
+        <span class="badge" style="background:rgba(107,159,255,0.15); color:#6b9fff; border-color:rgba(107,159,255,0.3);">
+          <i data-lucide="film" style="width:11px;height:11px;"></i> Director
+        </span>
+      {% endif %}
+    </div>
 
-      <div class="grid stagger">
-        {% for item in results %}
-        <div class="card">
-          <!-- Poster placeholder -->
-          <div class="card-poster-placeholder"
-            style="background:linear-gradient(135deg,hsl({{ forloop.counter0|add:200 }},25%,12%),hsl({{ forloop.counter0|add:240 }},20%,8%));">
-            <div class="icon">{% if item.type == 'TV Show' %}📺{% else %}🎬{% endif %}</div>
-            <div style="font-size:11px;color:#555;line-height:1.4;">{{ item.title|truncatechars:28 }}</div>
+    <div class="grid stagger">
+      {% for item in results %}
+      <a href="{% url 'title_detail' item.pk %}" style="text-decoration:none; color:inherit;">
+        <div class="card"
+             data-poster-title="{{ item.title|escapejs }}"
+             data-poster-year="{{ item.release_year }}"
+             data-poster-type="{{ item.type }}">
+          <div class="card-poster-placeholder" style="position:relative;">
+            <img src="" alt="{{ item.title }}" class="card-poster-img"
+                 style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;border-radius:inherit;">
+            <div class="poster-fallback" style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+              <div class="icon" style="color:var(--muted);">
+                {% if item.type == 'TV Show' %}
+                  <i data-lucide="tv" style="width:32px;height:32px;"></i>
+                {% else %}
+                  <i data-lucide="film" style="width:32px;height:32px;"></i>
+                {% endif %}
+              </div>
+              <div style="font-size:11px; color:var(--muted); line-height:1.4;">{{ item.title|truncatechars:28 }}</div>
+            </div>
           </div>
-
           <div class="card-body">
             <div class="card-title" title="{{ item.title }}">{{ item.title }}</div>
-
             <div class="card-meta">
               <span class="badge badge-platform-{{ item.platform|truncatewords:1|cut:' ' }}">{{ item.platform }}</span>
               {% if item.release_year %}<span class="badge">{{ item.release_year }}</span>{% endif %}
               {% if item.rating %}<span class="badge">{{ item.rating }}</span>{% endif %}
             </div>
-
-            <!-- Highlight matching role -->
             {% if item.director and query|lower in item.director|lower %}
-            <div style="font-size:11px;color:#6b9fff;margin-bottom:6px;">
-              🎬 Director: {{ item.director }}
+            <div style="font-size:11px; color:#6b9fff; margin-bottom:4px; display:flex; align-items:center; gap:4px;">
+              <i data-lucide="film" style="width:11px;height:11px;"></i> {{ item.director }}
             </div>
             {% endif %}
-
             {% if item.cast and query|lower in item.cast|lower %}
-            <div style="font-size:11px;color:#4caf50;margin-bottom:6px;
-                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+            <div style="font-size:11px; color:#4caf50; margin-bottom:4px; display:flex; align-items:center; gap:4px;
+                        white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
                  title="{{ item.cast }}">
-              🎭 Cast: {{ item.cast|truncatechars:60 }}
+              <i data-lucide="user" style="width:11px;height:11px;flex-shrink:0;"></i>
+              <span style="overflow:hidden;text-overflow:ellipsis;">{{ item.cast|truncatechars:50 }}</span>
             </div>
             {% endif %}
-
             {% if item.genres %}
-            <div style="font-size:11px;color:var(--muted);
-                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-              {{ item.genres|truncatechars:45 }}
+            <div style="font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              {{ item.genres|truncatechars:40 }}
             </div>
             {% endif %}
           </div>
         </div>
-        {% endfor %}
-      </div>
+      </a>
+      {% endfor %}
+    </div>
 
     {% else %}
-      <!-- No results -->
-      <div class="empty-state fade-in">
-        <div class="icon">🔍</div>
-        <h2>No results for "{{ query }}"</h2>
-        <p>Try a different spelling or a partial name (e.g. "Nolan" instead of "Christopher Nolan").</p>
+    <div class="empty-state fade-in">
+      <div class="icon">
+        <i data-lucide="search" style="width:56px;height:56px;"></i>
       </div>
+      <h2>No results for "{{ query }}"</h2>
+      <p>Try a different spelling or a partial name (e.g. "Nolan" instead of "Christopher Nolan").</p>
+    </div>
     {% endif %}
 
   {% else %}
-    <!-- Initial state — show suggestions -->
-    <div style="margin-top:48px;">
-      <div style="font-size:12px;font-weight:600;letter-spacing:1.5px;
-                  text-transform:uppercase;color:var(--muted);margin-bottom:16px;">
-        Try searching for
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:10px;">
-{% for name in suggestions %}
-<a href="?q={{ name }}"
-   style="padding:8px 18px;border-radius:20px;border:1px solid var(--border);
-          background:var(--surface);color:var(--muted);text-decoration:none;
-          font-size:13px;font-weight:500;transition:all .2s;"
-   onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--text)';"
-   onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">
-  {{ name }}
-</a>
-{% endfor %}
-      </div>
+  <div style="margin-top:48px;">
+    <div style="font-size:11px; font-weight:600; letter-spacing:1.5px;
+                text-transform:uppercase; color:var(--muted); margin-bottom:16px;">
+      Try searching for
     </div>
+    <div style="display:flex; flex-wrap:wrap; gap:10px;">
+      {% for name in suggestions %}
+      <a href="?q={{ name }}"
+         style="padding:8px 18px; border-radius:20px; border:1px solid var(--glass-border);
+                background:var(--glass); color:var(--text-dim); text-decoration:none;
+                font-size:13px; font-weight:500; transition:all .2s; backdrop-filter:var(--blur);"
+         onmouseover="this.style.borderColor='rgba(229,9,20,0.4)';this.style.color='var(--text)';"
+         onmouseout="this.style.borderColor='var(--glass-border)';this.style.color='var(--text-dim)';">
+        {{ name }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
   {% endif %}
 
 </div>
+
+<script>
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const card = e.target;
+    const title = card.dataset.posterTitle;
+    const year  = card.dataset.posterYear;
+    const type  = card.dataset.posterType;
+    if (!title || card.dataset.loaded) return;
+    card.dataset.loaded = '1';
+    fetch('/poster/?title=' + encodeURIComponent(title) + '&year=' + encodeURIComponent(year) + '&type=' + encodeURIComponent(type))
+      .then(r => r.json())
+      .then(data => {
+        if (data.url) {
+          const img = card.querySelector('.card-poster-img');
+          img.src = data.url;
+          img.style.display = 'block';
+          const fb = card.querySelector('.poster-fallback');
+          if (fb) fb.style.display = 'none';
+        }
+      }).catch(() => {});
+    observer.unobserve(card);
+  });
+}, { rootMargin: '200px' });
+document.querySelectorAll('.card[data-poster-title]').forEach(el => observer.observe(el));
+lucide.createIcons();
+</script>
 {% endblock %}

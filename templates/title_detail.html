@@ -2,88 +2,101 @@
 {% block content %}
 <div class="page-wrap">
 
-  <!-- Back button -->
-  <div style="margin-bottom:24px;">
+  <!-- Back -->
+  <div style="margin-bottom:28px;">
     <a href="javascript:history.back()"
-       style="color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;
-              display:inline-flex;align-items:center;gap:6px;transition:color .2s;"
-       onmouseover="this.style.color='var(--text)'"
-       onmouseout="this.style.color='var(--muted)'">
-      ← Back
+       style="color:var(--muted); text-decoration:none; font-size:13px; font-weight:500;
+              display:inline-flex; align-items:center; gap:6px; transition:color .2s;"
+       onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">
+      <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back
     </a>
   </div>
 
   <!-- Hero section -->
-  <div style="display:flex;gap:32px;align-items:flex-start;margin-bottom:48px;flex-wrap:wrap;">
+  <div style="display:flex; gap:36px; align-items:flex-start; margin-bottom:52px; flex-wrap:wrap;">
 
     <!-- Poster -->
-    <div style="flex-shrink:0;width:200px;">
-      <div class="card-poster-placeholder"
-           style="width:200px;height:300px;border-radius:12px;font-size:48px;
-                  background:linear-gradient(135deg,#1a1a2e,#16213e);">
-        <div class="icon" style="font-size:48px;">
-          {% if content.type == 'TV Show' %}📺{% else %}🎬{% endif %}
-        </div>
-        <div style="font-size:11px;color:#555;text-align:center;padding:0 12px;line-height:1.4;">
-          {{ content.title|truncatechars:40 }}
+    <div style="flex-shrink:0;">
+      <div style="width:220px; height:330px; border-radius:var(--radius); overflow:hidden;
+                  border:1px solid var(--glass-border); position:relative;
+                  background:linear-gradient(135deg,rgba(108,99,255,0.15),rgba(229,9,20,0.08));"
+           id="detailPosterWrap"
+           data-poster-title="{{ content.title|escapejs }}"
+           data-poster-year="{{ content.release_year }}"
+           data-poster-type="{{ content.type }}">
+        <img src="" alt="{{ content.title }}" id="detailPosterImg"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;">
+        <div id="detailPosterFallback"
+             style="position:absolute;inset:0;display:flex;flex-direction:column;
+                    align-items:center;justify-content:center;gap:12px; color:var(--muted);">
+          <div style="opacity:.5;">
+            {% if content.type == 'TV Show' %}
+              <i data-lucide="tv" style="width:52px;height:52px;"></i>
+            {% else %}
+              <i data-lucide="film" style="width:52px;height:52px;"></i>
+            {% endif %}
+          </div>
+          <div style="font-size:11px; color:var(--muted); text-align:center; padding:0 16px; line-height:1.4;">
+            {{ content.title|truncatechars:40 }}
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Info -->
-    <div style="flex:1;min-width:260px;">
+    <div style="flex:1; min-width:260px;">
 
-      <!-- Title + type badge -->
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
-        <h1 style="font-family:'Bebas Neue',sans-serif;font-size:42px;
-                   letter-spacing:1px;line-height:1.1;margin:0;">
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+        <h1 style="font-family:'Bebas Neue',sans-serif; font-size:48px; letter-spacing:1px; line-height:1; margin:0;">
           {{ content.title }}
         </h1>
-        <span class="badge" style="font-size:13px;padding:5px 14px;">
-          {% if content.type == 'TV Show' %}📺 TV Show{% else %}🎬 Movie{% endif %}
+        <span class="badge" style="font-size:12px; padding:5px 14px; display:inline-flex; align-items:center; gap:5px;">
+          {% if content.type == 'TV Show' %}
+            <i data-lucide="tv" style="width:12px;height:12px;"></i> TV Show
+          {% else %}
+            <i data-lucide="film" style="width:12px;height:12px;"></i> Movie
+          {% endif %}
         </span>
       </div>
 
-      <!-- Meta row -->
-      <div class="card-meta" style="margin-bottom:20px;flex-wrap:wrap;gap:8px;">
+      <!-- Meta -->
+      <div class="card-meta" style="margin-bottom:24px; gap:8px;">
         <span class="badge badge-platform-{{ content.platform|truncatewords:1|cut:' ' }}"
-              style="font-size:13px;padding:5px 12px;">
+              style="font-size:12px; padding:5px 12px;">
           {{ content.platform }}
         </span>
         {% if content.release_year %}
-        <span class="badge" style="font-size:13px;">{{ content.release_year }}</span>
+        <span class="badge" style="font-size:12px;">{{ content.release_year }}</span>
         {% endif %}
         {% if content.rating %}
-        <span class="badge" style="font-size:13px;">{{ content.rating }}</span>
+        <span class="badge" style="font-size:12px;">{{ content.rating }}</span>
         {% endif %}
         {% if content.type == 'Movie' and content.duration_minutes %}
-        <span class="badge" style="font-size:13px;">⏱ {{ content.duration_minutes }} min</span>
-        {% endif %}
-        {% if content.type == 'TV Show' and content.num_seasons %}
-        <span class="badge" style="font-size:13px;">{{ content.num_seasons }} season{{ content.num_seasons|pluralize }}</span>
+        <span class="badge" style="font-size:12px; display:inline-flex; align-items:center; gap:4px;">
+          <i data-lucide="clock" style="width:11px;height:11px;"></i> {{ content.duration_minutes }} min
+        </span>
         {% endif %}
       </div>
 
       <!-- Genres -->
       {% if content.genres %}
-      <div style="margin-bottom:20px;display:flex;flex-wrap:wrap;gap:8px;">
+      <div style="margin-bottom:24px; display:flex; flex-wrap:wrap; gap:8px;">
         {% for genre in content.genres.split %}
-        <span style="padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;
-                     background:var(--surface2);color:var(--muted);border:1px solid var(--border);">
+        <span style="padding:5px 14px; border-radius:20px; font-size:12px; font-weight:500;
+                     background:var(--glass); color:var(--text-dim); border:1px solid var(--glass-border);
+                     backdrop-filter:var(--blur);">
           {{ genre|cut:"," }}
         </span>
         {% endfor %}
       </div>
       {% endif %}
 
-      <!-- Description / Synopsis -->
+      <!-- Synopsis -->
       {% if content.description %}
-      <div style="margin-bottom:24px;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;
-                    text-transform:uppercase;color:var(--muted);margin-bottom:8px;">
-          Synopsis
-        </div>
-        <p style="font-size:14px;line-height:1.7;color:var(--text);margin:0;max-width:600px;">
+      <div style="margin-bottom:28px;">
+        <div style="font-size:11px; font-weight:700; letter-spacing:1.5px;
+                    text-transform:uppercase; color:var(--muted); margin-bottom:10px;">Synopsis</div>
+        <p style="font-size:14px; line-height:1.75; color:var(--text-dim); margin:0; max-width:600px;">
           {{ content.description }}
         </p>
       </div>
@@ -91,42 +104,41 @@
 
       <!-- Director -->
       {% if content.director %}
-      <div style="margin-bottom:16px;">
-        <span style="font-size:11px;font-weight:700;letter-spacing:1.5px;
-                     text-transform:uppercase;color:var(--muted);">Director</span>
-        <div style="margin-top:6px;">
-          <a href="{% url 'search_people' %}?q={{ content.director|urlencode }}"
-             style="color:var(--text);font-size:14px;font-weight:500;text-decoration:none;
-                    border-bottom:1px solid var(--border);transition:border-color .2s;"
-             onmouseover="this.style.borderColor='var(--red)'"
-             onmouseout="this.style.borderColor='var(--border)'">
-            🎬 {{ content.director }}
-          </a>
-        </div>
+      <div style="margin-bottom:20px;">
+        <div style="font-size:11px; font-weight:700; letter-spacing:1.5px;
+                    text-transform:uppercase; color:var(--muted); margin-bottom:8px;">Director</div>
+        <a href="{% url 'search_people' %}?q={{ content.director|urlencode }}"
+           style="display:inline-flex; align-items:center; gap:8px;
+                  color:var(--text); font-size:14px; font-weight:500; text-decoration:none;
+                  padding:8px 16px; border-radius:20px; border:1px solid var(--glass-border);
+                  background:var(--glass); backdrop-filter:var(--blur); transition:all .2s;"
+           onmouseover="this.style.borderColor='rgba(229,9,20,0.4)';this.style.color='#fff';"
+           onmouseout="this.style.borderColor='var(--glass-border)';this.style.color='var(--text)';">
+          <i data-lucide="film" style="width:13px;height:13px;"></i> {{ content.director }}
+        </a>
       </div>
       {% endif %}
 
       <!-- Cast -->
       {% if cast_list %}
-      <div style="margin-bottom:24px;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;
-                    text-transform:uppercase;color:var(--muted);margin-bottom:10px;">
-          Cast
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <div style="margin-bottom:28px;">
+        <div style="font-size:11px; font-weight:700; letter-spacing:1.5px;
+                    text-transform:uppercase; color:var(--muted); margin-bottom:10px;">Cast</div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
           {% for actor in cast_list|slice:":12" %}
           <a href="{% url 'search_people' %}?q={{ actor|urlencode }}"
-             style="padding:6px 14px;border-radius:20px;background:var(--surface2);
-                    color:var(--muted);font-size:12px;font-weight:500;text-decoration:none;
-                    border:1px solid var(--border);transition:all .2s;"
-             onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--text)';"
-             onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)';">
-            🎭 {{ actor }}
+             style="display:inline-flex; align-items:center; gap:6px;
+                    padding:6px 14px; border-radius:20px; background:var(--glass);
+                    color:var(--text-dim); font-size:12px; font-weight:500; text-decoration:none;
+                    border:1px solid var(--glass-border); backdrop-filter:var(--blur); transition:all .2s;"
+             onmouseover="this.style.borderColor='rgba(255,255,255,0.2)';this.style.color='var(--text)';"
+             onmouseout="this.style.borderColor='var(--glass-border)';this.style.color='var(--text-dim)';">
+            <i data-lucide="user" style="width:11px;height:11px;"></i> {{ actor }}
           </a>
           {% endfor %}
           {% if cast_list|length > 12 %}
-          <span style="padding:6px 14px;border-radius:20px;background:var(--surface2);
-                       color:var(--muted);font-size:12px;border:1px solid var(--border);">
+          <span style="padding:6px 14px; border-radius:20px; background:var(--glass);
+                       color:var(--muted); font-size:12px; border:1px solid var(--glass-border);">
             +{{ cast_list|length|add:"-12" }} more
           </span>
           {% endif %}
@@ -135,19 +147,18 @@
       {% endif %}
 
       <!-- Rating -->
-      <div style="margin-top:8px;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;
-                    text-transform:uppercase;color:var(--muted);margin-bottom:10px;">
-          Your Rating
-        </div>
+      <div>
+        <div style="font-size:11px; font-weight:700; letter-spacing:1.5px;
+                    text-transform:uppercase; color:var(--muted); margin-bottom:12px;">Your Rating</div>
+
         {% if user_score %}
         <div class="rated-check" style="font-size:16px;" id="ratingDisplay">
-          ✓ Rated {{ user_score }}/5
+          <i data-lucide="check-circle" style="width:16px;height:16px;"></i> Rated {{ user_score }}/5
         </div>
         <button onclick="document.getElementById('ratingDisplay').style.display='none';
                          document.getElementById('ratingForm').style.display='block';"
-                style="margin-top:8px;background:none;border:none;color:var(--muted);
-                       font-size:12px;cursor:pointer;text-decoration:underline;
+                style="margin-top:8px; background:none; border:none; color:var(--muted);
+                       font-size:12px; cursor:pointer; text-decoration:underline;
                        font-family:'DM Sans',sans-serif;">
           Change rating
         </button>
@@ -157,17 +168,17 @@
           {% csrf_token %}
           <div class="star-rating" id="detailStars">
             {% for i in "12345" %}
-            <span class="star"
-                  style="font-size:28px;"
-                  data-val="{{ forloop.counter }}"
+            <span class="star" style="font-size:32px;" data-val="{{ forloop.counter }}"
                   onclick="submitRating({{ forloop.counter }})">★</span>
             {% endfor %}
           </div>
           <input type="hidden" name="score" id="scoreInput" value="">
           <button type="submit" id="rateBtn"
-                  style="display:none;margin-top:12px;background:var(--red);color:#fff;
-                         border:none;border-radius:8px;padding:10px 24px;font-size:14px;
-                         font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">
+                  style="display:none; margin-top:14px; background:var(--red); color:#fff;
+                         border:none; border-radius:var(--radius-sm); padding:10px 28px;
+                         font-size:14px; font-weight:600; cursor:pointer;
+                         font-family:'DM Sans',sans-serif;
+                         box-shadow:0 4px 16px rgba(229,9,20,0.35);">
             Save Rating
           </button>
         </form>
@@ -178,39 +189,39 @@
 
   <!-- Similar titles -->
   {% if similar %}
-  <div style="margin-top:16px;">
+  <div style="margin-top:8px;">
     <div class="section-header" style="margin-bottom:20px;">
-      <span class="section-title"
-            style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;">
-        More Like This
-      </span>
+      <span class="section-title">More Like This</span>
     </div>
     <div class="grid">
       {% for item in similar %}
-      <a href="{% url 'title_detail' item.pk %}" style="text-decoration:none;color:inherit;">
-        <div class="card" style="cursor:pointer;transition:transform .2s;"
-             onmouseover="this.style.transform='translateY(-4px)'"
-             onmouseout="this.style.transform='translateY(0)'">
-          <div class="card-poster-placeholder"
-               style="background:linear-gradient(135deg,
-                 hsl({{ forloop.counter0|add:200 }},25%,12%),
-                 hsl({{ forloop.counter0|add:240 }},20%,8%));">
-            <div class="icon">{% if item.type == 'TV Show' %}📺{% else %}🎬{% endif %}</div>
-            <div style="font-size:10px;color:#555;">{{ item.title|truncatechars:25 }}</div>
+      <a href="{% url 'title_detail' item.pk %}" style="text-decoration:none; color:inherit;">
+        <div class="card"
+             data-poster-title="{{ item.title|escapejs }}"
+             data-poster-year="{{ item.release_year }}"
+             data-poster-type="{{ item.type }}">
+          <div class="card-poster-placeholder" style="position:relative;">
+            <img src="" alt="{{ item.title }}" class="card-poster-img"
+                 style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;border-radius:inherit;">
+            <div class="poster-fallback" style="display:flex;flex-direction:column;align-items:center;gap:8px; color:var(--muted);">
+              <div class="icon" style="opacity:.5;">
+                {% if item.type == 'TV Show' %}
+                  <i data-lucide="tv" style="width:28px;height:28px;"></i>
+                {% else %}
+                  <i data-lucide="film" style="width:28px;height:28px;"></i>
+                {% endif %}
+              </div>
+              <div style="font-size:10px; color:var(--muted);">{{ item.title|truncatechars:24 }}</div>
+            </div>
           </div>
           <div class="card-body">
-            <div class="card-title" style="font-size:13px;">{{ item.title|truncatechars:35 }}</div>
+            <div class="card-title" style="font-size:13px;">{{ item.title|truncatechars:34 }}</div>
             <div class="card-meta">
-              <span class="badge badge-platform-{{ item.platform|truncatewords:1|cut:' ' }}">
-                {{ item.platform }}
-              </span>
-              {% if item.release_year %}
-              <span class="badge">{{ item.release_year }}</span>
-              {% endif %}
+              <span class="badge badge-platform-{{ item.platform|truncatewords:1|cut:' ' }}">{{ item.platform }}</span>
+              {% if item.release_year %}<span class="badge">{{ item.release_year }}</span>{% endif %}
             </div>
-            <div style="font-size:11px;color:var(--muted);overflow:hidden;
-                        text-overflow:ellipsis;white-space:nowrap;">
-              {{ item.genres|truncatechars:35 }}
+            <div style="font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+              {{ item.genres|truncatechars:34 }}
             </div>
           </div>
         </div>
@@ -224,12 +235,56 @@
 
 <script>
 function submitRating(val) {
-  // Light up stars
-  document.querySelectorAll('#detailStars .star').forEach((s, i) => {
-    s.classList.toggle('lit', i < val);
-  });
+  document.querySelectorAll('#detailStars .star').forEach((s, i) => s.classList.toggle('lit', i < val));
   document.getElementById('scoreInput').value = val;
   document.getElementById('rateBtn').style.display = 'block';
 }
+
+// Load main poster
+(function() {
+  const wrap = document.getElementById('detailPosterWrap');
+  if (!wrap) return;
+  const title = wrap.dataset.posterTitle;
+  const year  = wrap.dataset.posterYear;
+  const type  = wrap.dataset.posterType;
+  fetch('/poster/?title=' + encodeURIComponent(title) + '&year=' + encodeURIComponent(year) + '&type=' + encodeURIComponent(type))
+    .then(r => r.json())
+    .then(data => {
+      if (data.url) {
+        const img = document.getElementById('detailPosterImg');
+        img.src = data.url;
+        img.style.display = 'block';
+        document.getElementById('detailPosterFallback').style.display = 'none';
+      }
+    }).catch(() => {});
+})();
+
+// Lazy load similar title posters
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const card = e.target;
+    const title = card.dataset.posterTitle;
+    const year  = card.dataset.posterYear;
+    const type  = card.dataset.posterType;
+    if (!title || card.dataset.loaded) return;
+    card.dataset.loaded = '1';
+    fetch('/poster/?title=' + encodeURIComponent(title) + '&year=' + encodeURIComponent(year) + '&type=' + encodeURIComponent(type))
+      .then(r => r.json())
+      .then(data => {
+        if (data.url) {
+          const img = card.querySelector('.card-poster-img');
+          img.src = data.url;
+          img.style.display = 'block';
+          const fb = card.querySelector('.poster-fallback');
+          if (fb) fb.style.display = 'none';
+        }
+      }).catch(() => {});
+    observer.unobserve(card);
+  });
+}, { rootMargin: '200px' });
+
+document.querySelectorAll('.card[data-poster-title]').forEach(el => observer.observe(el));
+lucide.createIcons();
 </script>
 {% endblock %}

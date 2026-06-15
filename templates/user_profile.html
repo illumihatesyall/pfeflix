@@ -3,52 +3,66 @@
 <div class="page-wrap">
 
   <!-- Back -->
-  <div style="margin-bottom:24px;">
-    <a href="/users/" style="color:#888;text-decoration:none;font-size:14px;">← All Users</a>
+  <div style="margin-bottom:28px;">
+    <a href="/users/"
+       style="color:var(--muted); text-decoration:none; font-size:13px; font-weight:500;
+              display:inline-flex; align-items:center; gap:6px; transition:color .2s;"
+       onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">
+      <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Community
+    </a>
   </div>
 
   <!-- Profile header -->
-  <div style="display:flex;align-items:center;gap:28px;margin-bottom:40px;flex-wrap:wrap;">
+  <div style="display:flex; align-items:center; gap:28px; margin-bottom:44px; flex-wrap:wrap;">
+
     <!-- Avatar -->
-    <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#e50914,#8b0000);
-                display:flex;align-items:center;justify-content:center;
-                font-size:36px;font-weight:900;color:#fff;flex-shrink:0;">
+    <div style="width:96px; height:96px; border-radius:50%; flex-shrink:0;
+                background:linear-gradient(135deg, var(--red), #8b0000);
+                display:flex; align-items:center; justify-content:center;
+                font-family:'Bebas Neue',sans-serif; font-size:40px; color:#fff;
+                box-shadow:0 0 32px rgba(229,9,20,0.3); border:2px solid rgba(229,9,20,0.3);">
       {{ profile_user.username|first|upper }}
     </div>
 
     <div style="flex:1;">
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px;">
-        <h1 style="font-size:32px;font-weight:900;margin:0;">{{ profile_user.username }}</h1>
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+        <h1 style="font-size:34px; font-weight:700; margin:0; letter-spacing:-0.5px;">
+          {{ profile_user.username }}
+        </h1>
         {% if is_own_profile %}
-        <span style="background:#1a3a1a;color:#4caf50;border:1px solid #2d5a2d;
-                     padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">
+        <span style="background:rgba(76,175,80,0.15); color:#4caf50; border:1px solid rgba(76,175,80,0.3);
+                     padding:4px 14px; border-radius:20px; font-size:12px; font-weight:600;">
           You
         </span>
         {% endif %}
         {% if taste_match is not None %}
-        <span style="background:#1a1a3a;color:#6b9fff;border:1px solid #2d2d5a;
-                     padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">
+        <span style="background:rgba(108,99,255,0.15); color:#a5a0ff; border:1px solid rgba(108,99,255,0.3);
+                     padding:4px 14px; border-radius:20px; font-size:12px; font-weight:600;">
           {{ taste_match }}% taste match
         </span>
         {% endif %}
       </div>
 
-      <div style="display:flex;gap:24px;flex-wrap:wrap;">
+      <div style="display:flex; gap:28px; flex-wrap:wrap;">
         <div style="text-align:center;">
-          <div style="font-size:24px;font-weight:900;color:#e50914;">{{ ratings_count }}</div>
-          <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;">Rated</div>
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--red);">
+            {{ ratings_count }}
+          </div>
+          <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Rated</div>
         </div>
         {% if avg_score %}
         <div style="text-align:center;">
-          <div style="font-size:24px;font-weight:900;color:#f5c518;">{{ avg_score }}</div>
-          <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;">Avg Score</div>
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:28px; color:#f5c518;">
+            {{ avg_score }}
+          </div>
+          <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Avg Score</div>
         </div>
         {% endif %}
         <div style="text-align:center;">
-          <div style="font-size:24px;font-weight:900;color:#fff;">
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--text);">
             {{ profile_user.date_joined|date:"Y" }}
           </div>
-          <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;">Joined</div>
+          <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Joined</div>
         </div>
       </div>
     </div>
@@ -56,13 +70,14 @@
 
   <!-- Favorite genres -->
   {% if top_genres %}
-  <div style="margin-bottom:36px;">
-    <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-                color:#666;margin-bottom:12px;">Favorite Genres</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+  <div style="margin-bottom:40px;">
+    <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+                color:var(--muted); margin-bottom:14px;">Favorite Genres</div>
+    <div style="display:flex; flex-wrap:wrap; gap:8px;">
       {% for genre in top_genres %}
-      <span style="padding:6px 16px;border-radius:20px;background:#1a1a1a;
-                   color:#aaa;font-size:13px;font-weight:500;border:1px solid #2a2a2a;">
+      <span style="padding:7px 18px; border-radius:20px; background:var(--glass);
+                   color:var(--text-dim); font-size:13px; font-weight:500;
+                   border:1px solid var(--glass-border); backdrop-filter:var(--blur);">
         {{ genre }}
       </span>
       {% endfor %}
@@ -73,35 +88,45 @@
   <!-- Rated titles -->
   {% if ratings %}
   <div>
-    <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-                color:#666;margin-bottom:20px;">
+    <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+                color:var(--muted); margin-bottom:20px;">
       Rated Titles ({{ ratings_count }})
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px;">
       {% for item in ratings %}
       <a href="{% if item.content %}/title/{{ item.content.pk }}/{% else %}#{% endif %}"
-         style="text-decoration:none;color:inherit;">
-        <div style="background:#1a1a1a;border-radius:12px;overflow:hidden;
-                    border:1px solid #2a2a2a;transition:transform .2s;cursor:pointer;"
-             onmouseover="this.style.transform='translateY(-4px)'"
-             onmouseout="this.style.transform='translateY(0)'">
-          <!-- Mini poster -->
-          <div style="height:120px;background:linear-gradient(135deg,#1a1a2e,#16213e);
-                      display:flex;align-items:center;justify-content:center;font-size:28px;">
-            {% if item.content %}
-              {% if item.content.type == 'TV Show' %}📺{% else %}🎬{% endif %}
-            {% else %}🎬{% endif %}
-          </div>
-          <div style="padding:12px;">
-            <div style="font-size:13px;font-weight:700;margin-bottom:6px;
-                        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-              {{ item.rating.title }}
+         style="text-decoration:none; color:inherit;">
+        <div class="card">
+          <div class="card-poster-placeholder"
+               {% if item.content %}
+               data-poster-title="{{ item.content.title|escapejs }}"
+               data-poster-year="{{ item.content.release_year }}"
+               data-poster-type="{{ item.content.type }}"
+               {% endif %}
+               style="position:relative; aspect-ratio:2/3;">
+            <img src="" alt="" class="card-poster-img"
+                 style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;border-radius:inherit;">
+            <div class="poster-fallback" style="display:flex;align-items:center;justify-content:center; color:var(--muted);">
+              <div class="icon" style="opacity:.5;">
+                {% if item.content %}
+                  {% if item.content.type == 'TV Show' %}
+                    <i data-lucide="tv" style="width:32px;height:32px;"></i>
+                  {% else %}
+                    <i data-lucide="film" style="width:32px;height:32px;"></i>
+                  {% endif %}
+                {% else %}
+                  <i data-lucide="film" style="width:32px;height:32px;"></i>
+                {% endif %}
+              </div>
             </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-              <div style="font-size:11px;color:#666;">
+          </div>
+          <div class="card-body">
+            <div class="card-title" style="font-size:13px;">{{ item.rating.title|truncatechars:30 }}</div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:6px;">
+              <div style="font-size:11px; color:var(--muted);">
                 {% if item.content %}{{ item.content.platform }}{% endif %}
               </div>
-              <div style="color:#f5c518;font-size:13px;font-weight:700;">
+              <div style="color:#f5c518; font-size:13px; font-weight:700;">
                 ★ {{ item.rating.score|floatformat:0 }}/5
               </div>
             </div>
@@ -112,11 +137,42 @@
     </div>
   </div>
   {% else %}
-  <div style="text-align:center;padding:60px 20px;color:#555;">
-    <div style="font-size:48px;margin-bottom:16px;">🎬</div>
-    <div style="font-size:16px;">No ratings yet.</div>
+  <div class="empty-state">
+    <div class="icon">
+      <i data-lucide="film" style="width:56px;height:56px;"></i>
+    </div>
+    <h2>No ratings yet</h2>
+    <p>Titles rated by {{ profile_user.username }} will appear here.</p>
   </div>
   {% endif %}
 
 </div>
+
+<script>
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const wrap = e.target;
+    const title = wrap.dataset.posterTitle;
+    const year  = wrap.dataset.posterYear;
+    const type  = wrap.dataset.posterType;
+    if (!title || wrap.dataset.loaded) return;
+    wrap.dataset.loaded = '1';
+    fetch('/poster/?title=' + encodeURIComponent(title) + '&year=' + encodeURIComponent(year) + '&type=' + encodeURIComponent(type))
+      .then(r => r.json())
+      .then(data => {
+        if (data.url) {
+          const img = wrap.querySelector('.card-poster-img');
+          img.src = data.url;
+          img.style.display = 'block';
+          const fb = wrap.querySelector('.poster-fallback');
+          if (fb) fb.style.display = 'none';
+        }
+      }).catch(() => {});
+    observer.unobserve(wrap);
+  });
+}, { rootMargin: '200px' });
+document.querySelectorAll('[data-poster-title]').forEach(el => observer.observe(el));
+lucide.createIcons();
+</script>
 {% endblock %}

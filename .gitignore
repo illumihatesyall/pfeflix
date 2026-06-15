@@ -47,3 +47,8 @@ staticfiles/
 
 # Migrations (optional - some teams commit these)
 # core/migrations/
+
+# Project-specific ignores
+*.csv
+output.txt
+diagnose.py
