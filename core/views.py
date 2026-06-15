@@ -265,3 +265,8 @@ def users_list(request):
 def logout_user(request):
     logout(request)
     return redirect('home')
+
+
+def debug_env(request):
+    token = os.environ.get('TMDB_API_KEY', 'NOT FOUND')
+    return JsonResponse({'token_length': len(token), 'starts_with': token[:10] if token != 'NOT FOUND' else 'NOT FOUND'})

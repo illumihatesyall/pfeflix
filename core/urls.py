@@ -15,5 +15,6 @@ urlpatterns = [
     path('users/',               views.users_list,     name='users_list'),
     path('profile/<str:username>/', views.user_profile, name='user_profile'),
     path('poster/', views.get_poster, name='get_poster'),
+    path('debug-env/', views.debug_env),
 ]
 
